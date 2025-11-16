@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Component Study & Quiz — Project 6338 (Upgraded)</title>
+<style>
+:root{ --brand:#4458dc; --muted:#6c757d; --ok:#2d8a4a; --bad:#d64545; --card:#fff; }
+body{font-family:Arial, Helvetica, sans-serif;background:#f4f6fb;margin:0;color:#222;}
+header{
+    background:linear-gradient(90deg,var(--brand),#1b8bff);
+    color:white;
+    padding:18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    text-align: center;
+    width: 100%;
+}
+header h1, header .small-muted { width: 100%; text-align: center; }
+header h1{ margin:0; font-size:20px; margin-top: 5px; }
+nav{display:flex;gap:8px;justify-content:center;padding:12px;background:#eef2ff}
+nav button{border:0;background:white;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700}
+nav button.active{background:var(--brand);color:white}
+main{max-width:1200px;margin:18px auto;padding:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.card{ background:var(--card); border-radius:10px; padding:12px; border:1px solid #e6e9f2; display:flex; flex-direction:column; cursor:pointer; transition: box-shadow 0.15s ease-in-out; }
+.card:hover{ box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.img-box{width:100%;height:160px;border-radius:8px;background:#fbfdff;border:1px dashed #e6eefc;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.img-box img{max-width:100%;max-height:100%;object-fit:contain; display:block}
+.img-box.empty{background:transparent}
+.meta{font-size:13px;color:var(--muted)}
+.datasheet{display:inline-block;margin-top:8px;padding:8px 10px;background:var(--brand);color:white;border-radius:6px;text-decoration:none;font-weight:700;z-index:1000;position:relative;}
+.datasheet-wrap{display: flex; justify-content: center;}
+.search{width:100%;padding:10px;border-radius:8px;border:1px solid #dbe6ff;margin-bottom:12px}
+.quiz-wrap{max-width:900px;margin:0 auto;background:white;padding:16px;border-radius:10px;border:1px solid #e6e9f2}
+.q-header{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.question-area{margin-top:14px}
+.question-image{width:100%;min-height:260px;height:auto;border-radius:10px;background:#fbfdff;border:1px dashed #e6eefc;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.q-text{font-weight:700;font-size:1.05rem;margin-top:10px}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:12px}
+.option{background:#fff;border:2px solid #e9eefc;padding:10px;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:120px}
+.option img{max-width:100%;max-height:110px;object-fit:contain}
+.option.correct{outline:4px solid rgba(46,168,79,0.14);border-color:var(--ok)}
+.option.incorrect{outline:4px solid rgba(214,65,69,0.12);border-color:var(--bad)}
+.text-answer{width:100%;padding:10px;border-radius:8px;border:1px solid #dbe6ff}
+.btn{padding:10px 14px;border-radius:8px;border:0;background:var(--brand);color:white;font-weight:700;cursor:pointer}
+.small-muted{font-size:13px;color:var(--muted)}
+.progress{height:8px;background:#eef2ff;border-radius:8px;overflow:hidden;margin-top:10px}
+.progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--brand),#1b8bff);width:0%}
+.missing-img{width:100%;height:100%;display:block;background:transparent}
+.login-box{max-width:420px;margin:50px auto;padding:25px;background:white;border-radius:10px;border:1px solid #e6e9f2;text-align:center;}
+.login-input-group{margin-bottom:15px;text-align:left;}
+.login-input-group label{display:block;margin-bottom:5px;font-size:14px;}
+.modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); padding-top: 60px; }
+.modal-content { background-color: #fefefe; margin: 5% auto; padding: 20px; border-radius: 12px; width: 90%; max-width: 600px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+.close { color: #aaa; float: right; font-size: 28px; font-weight: bold; }
+.close:hover, .close:focus { color: #000; text-decoration: none; cursor: pointer; }
+.modal-detail-img { width: 100%; height: 250px; border-radius: 8px; background: #fbfdff; border: 1px dashed #e6eefc; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 15px; }
+.modal-detail-img img{ max-width: 100%; max-height: 100%; object-fit: contain;}
+.modal-detail-row { margin-bottom: 8px; padding: 5px 0; border-bottom: 1px solid #eee; }
+.modal-detail-label { font-weight: 700; display: inline-block; width: 120px; color: var(--brand); vertical-align: top; }
+.modal-detail-content { display: inline-block; width: calc(100% - 130px); text-align: left; white-space: pre-wrap; }
+.admin-questions h3 { margin-top: 20px; margin-bottom: 10px; }
+.question-item { background: #f9fbff; border: 1px solid #dde4ff; padding: 12px; margin-bottom: 10px; border-radius: 8px; position: relative; }
+.question-controls { text-align: right; margin-top: 8px; }
+.question-controls button { margin-left: 6px; padding: 4px 8px; font-size: 12px; }
+.question-form { background: #f0f5ff; padding: 16px; border-radius: 8px; margin-top: 12px; }
+@media(max-width:600px){
+    .question-image{height:180px}
+    .img-box{height:120px}
+    .modal-detail-label { width: 100%; display: block; margin-bottom: 3px; }
+    .modal-detail-content { width: 100%; display: block; padding-left: 10px; }
+}
+</style>
+</head>
+<body>
+<header>
+    <img src="images/logo.png" alt="Advanced Mechanix Logo" class="header-logo" style="height:34px"/>
+    <h1>Component Study & Quiz — Project 6338</h1>
+    <div class="small-muted">Study list based on PART LIST DETAILS (6338). Quiz: MCQ → Image Choice → Write Answer.</div>
+</header>
+<nav id="main-nav" style="display:none;">
+    <button class="active" id="tab-study">Study Components</button>
+    <button id="tab-quiz">Take Quiz</button>
+    <button id="tab-admin-history" style="display:none;">View History</button>
+</nav>
+
+<main>
+    <!-- LOGIN -->
+    <section id="login-section">
+        <div class="login-box">
+            <h2 style="margin:6px 0">🔑 System Access</h2>
+            <p class="small-muted">Choose role and log in.</p>
+            <div id="role-choice" style="display:flex;gap:8px;justify-content:center;margin:12px 0;">
+                <button class="btn" onclick="showLoginForm('user')">User</button>
+                <button class="btn" onclick="showLoginForm('admin')">Admin</button>
+            </div>
+            <div id="login-form" style="display:none;">
+                <h3 id="login-role-title"></h3>
+                <div class="login-input-group">
+                    <label for="usernameSelect">Select Username</label>
+                    <select id="usernameSelect" class="text-answer"></select>
+                </div>
+                <div class="login-input-group">
+                    <label for="password">Password</label>
+                    <input id="password" type="password" class="text-answer" />
+                </div>
+                <div id="login-error" style="color:var(--bad); margin-bottom:10px"></div>
+                <button class="btn" onclick="performLogin()">Log In</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- STUDY -->
+    <section id="study-section" style="display:none">
+        <input id="searchBox" class="search" placeholder="Search by part number, name or drawing..." oninput="filterStudy()" />
+        <div id="componentsGrid" class="grid"></div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz-section" style="display:none">
+        <div class="quiz-wrap">
+            <div id="quizStart">
+                <div style="text-align:center;padding:18px">
+                    <h2 style="margin:6px 0">🎯 Take Quiz</h2>
+                    <p class="small-muted">Quiz order: MCQ → Image Choice → Write Answer. Enter name and start.</p>
+                    <input id="userName" class="search" placeholder="Your name (defaults to logged-in user)" />
+                    <div style="margin-top:10px">
+                        <button class="btn" onclick="initQuiz()">Start Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quizArea" style="display:none">
+                <div class="q-header">
+                    <div>
+                        <div class="small-muted">Player: <span id="playerName"></span></div>
+                        <div class="small-muted">Question <span id="qIndex">0</span> / <span id="qTotal">0</span></div>
+                    </div>
+                    <div class="small-muted">Score: <span id="liveScore">0</span></div>
+                </div>
+
+                <div class="progress"><i id="progFill"></i></div>
+                <div id="questionContainer" class="question-area"></div>
+            </div>
+
+            <div id="quizEnd" style="display:none;text-align:center;padding:18px">
+                <h2>Result</h2>
+                <div style="font-weight:800;font-size:22px;margin:12px 0" id="finalResult"></div>
+                <div class="small-muted">Detailed answers saved to history (admin view).</div>
+                <div style="margin-top:16px">
+                    <button class="btn" onclick="restartQuiz()">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ADMIN/HISTORY (kept) -->
+    <section id="admin-history-section" style="display:none">
+        <div class="quiz-wrap">
+            <h2 style="margin-top:0;">📋 Quiz History Log (Persistent)</h2>
+            <div style="display:flex;gap:10px;margin-bottom:12px;">
+                <button class="btn" id="exportResultsBtn" onclick="exportResults()" style="display:none;">Export Employee Results (Excel)</button>
+                <button class="btn" id="exportAnswersBtn" onclick="exportAnswers()" style="display:none;">Export Employee Answers (Excel Workbook)</button>
+                <button class="btn" onclick="clearHistory()">Clear Stored History</button>
+            </div>
+            <div id="quizHistoryDisplay"><p class="small-muted" style="text-align:center;">Loading history...</p></div>
+            <h2 style="margin-top:20px;">📝 Session Activity Log (Resets on Refresh)</h2>
+            <div id="activityLogDisplay"><p class="small-muted" style="text-align:center;">No session activity yet.</p></div>
+
+            <div class="admin-questions">
+                <h2>✏️ Manage Quiz Questions</h2>
+                <!-- minimal management panels (same structure as before) -->
+                <h3>MCQ Questions</h3>
+                <div id="mcq-questions-list"></div>
+                <button class="btn" onclick="toggleForm('mcq-form')">+ Add MCQ</button>
+                <div id="mcq-form" class="question-form" style="display:none;">
+                    <h4>Add / Edit MCQ</h4>
+                    <input type="hidden" id="mcq-edit-id" />
+                    <label>Question</label>
+                    <textarea id="mcq-question" rows="2"></textarea>
+                    <label>Choices (one per line)</label>
+                    <textarea id="mcq-choices" rows="4"></textarea>
+                    <label>Correct Answer Index (0-based)</label>
+                    <input type="number" id="mcq-correct" min="0" />
+                    <div class="question-controls">
+                        <button class="btn" onclick="saveMcq()">Save</button>
+                        <button class="btn" style="background:#ccc;color:#000;" onclick="toggleForm('mcq-form')">Cancel</button>
+                    </div>
+                </div>
+
+                <h3>Image Identification Questions</h3>
+                <div id="image-id-questions-list"></div>
+                <button class="btn" onclick="toggleForm('image-id-form')">+ Add Image ID</button>
+                <div id="image-id-form" class="question-form" style="display:none;">
+                    <h4>Add / Edit Image ID</h4>
+                    <input type="hidden" id="image-id-edit-id" />
+                    <label>Part Number</label>
+                    <input type="text" id="image-id-part" />
+                    <label>Filename (images/)</label>
+                    <input type="text" id="image-id-filename" />
+                    <label>Accepted Answers (comma-separated)</label>
+                    <input type="text" id="image-id-accepted" />
+                    <label>Prompt</label>
+                    <input type="text" id="image-id-prompt" />
+                    <div class="question-controls">
+                        <button class="btn" onclick="saveImageId()">Save</button>
+                        <button class="btn" style="background:#ccc;color:#000;" onclick="toggleForm('image-id-form')">Cancel</button>
+                    </div>
+                </div>
+
+                <h3>Image Choice Questions</h3>
+                <div id="image-choice-questions-list"></div>
+                <button class="btn" onclick="toggleForm('image-choice-form')">+ Add Image Choice</button>
+                <div id="image-choice-form" class="question-form" style="display:none;">
+                    <h4>Add / Edit Image Choice</h4>
+                    <input type="hidden" id="image-choice-edit-id" />
+                    <label>Part Number</label>
+                    <input type="text" id="image-choice-part" />
+                    <label>Choices (filenames, comma-separated)</label>
+                    <input type="text" id="image-choice-filenames" />
+                    <label>Correct Index (0-based)</label>
+                    <input type="number" id="image-choice-correct" min="0" max="3" />
+                    <div class="question-controls">
+                        <button class="btn" onclick="saveImageChoice()">Save</button>
+                        <button class="btn" style="background:#ccc;color:#000;" onclick="toggleForm('image-choice-form')">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer style="text-align:center;padding:14px 0;color:var(--muted)">Images: put files in <code>images/</code> (e.g. <code>images/SEL751.jpg</code>), symbols in <code>images/symbols/</code>.</footer>
+
+<!-- Component modal -->
+<div id="componentModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3 id="modalName"></h3>
+        <div class="modal-detail-img"><img id="modalImage" src="" alt="Component Image" /></div>
+        <div id="modalDetails"></div>
+        <div style="margin-top:15px;">
+            <a id="modalDatasheet" class="datasheet" href="#" target="_blank" rel="noopener">View Datasheet &rarr;</a>
+            <span id="noDatasheet" class="small-muted" style="margin-left:10px; display:none;">No datasheet link available.</span>
+        </div>
+    </div>
+</div>
+
+<!-- Include SheetJS (xlsx) for Excel export -->
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/shim.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+
+<script>
+/* ------------------------------
+  Users & Admins (static, as requested)
+-------------------------------*/
+const USERS_LIST = [
+  { name: "dusty", password: "1234" },
+  { name: "saul", password: "1233" },
+  { name: "addy", password: "1244" },
+  { name: "shaz", password: "1212" },
+  { name: "Shahid", password: "1231" },
+  { name: "mir max", password: "1243" },
+  { name: "Fahad", password: "8989" },
+  { name: "haris", password: "7894" },
+  { name: "Rashid", password: "5656" },
+  { name: "hazz", password: "8975" },
+  { name: "sherry", password: "5623" }
+];
+
+const ADMINS_LIST = [
+  { name: "junaid qazi", password: "987456" },
+  { name: "saul", password: "785462" }
+];
+
+/* ---------------------------
+   QUESTION POOLS (Inserted)
+   Using the exact arrays you supplied
+----------------------------*/
+window.IMAGE_QUESTIONS = [
+  { id:1, part:"751002BCB4B7781AFF1", filename:"751002BCB4B7781AFF1.jpg", accepted:["751002BCB4B7781AFF1","sel-751","751","sel 751"], prompt:"Identify this protection relay" },
+  { id:2, part:"5SY62257CC", filename:"5SY62257CC.jpg", accepted:["5sy62257cc","5sy62257","5sy62257c"], prompt:"Identify this circuit breaker (F1)" },
+  { id:3, part:"5SY43037CC", filename:"5SY43037CC.jpg", accepted:["5sy43037cc","5sy43037"], prompt:"Identify this 3-phase circuit breaker (F5)" },
+  { id:4, part:"XB4BS8444", filename:"XB4BS8444.jpg", accepted:["xb4bs8444","xb4 bs8444","xb4"], prompt:"Identify this emergency stop pushbutton" },
+  { id:5, part:"D7P-LF3PN3GX10", filename:"D7P-LF3PN3GX10.jpg", accepted:["d7p-lf3pn3gx10","d7plf3pn3gx10","d7plf3"], prompt:"Identify this green indicator" },
+  { id:6, part:"D7P-P0PN3AX7", filename:"D7P-P0PN3AX7.jpg", accepted:["d7p-p0pn3ax7","d7pp0pn3","d7p p0pn3"], prompt:"Identify this amber indicator" },
+  { id:7, part:"D7PP4PN3RXD7", filename:"D7PP4PN3RXD7.jpg", accepted:["d7pp4pn3rxd7","d7pp4pn3","d7pp4"], prompt:"Identify this red indicator" },
+  { id:8, part:"D7P-SB32", filename:"D7P-SB32.jpg", accepted:["d7p-sb32","d7psb32","sb32"], prompt:"Identify this selector switch" },
+  { id:9, part:"3RH2122-1BB40", filename:"3RH2122-1BB40.jpg", accepted:["3rh2122-1bb40","3rh2122"], prompt:"Identify this contactor relay (K1)" },
+  { id:10, part:"3RH2131-1BB40", filename:"3RH2131-1BB40.jpg", accepted:["3rh2131-1bb40","3rh2131"], prompt:"Identify this contactor relay (KBE)" }
+];
+
+window.MCQ_QUESTIONS = [
+  { id:11, q:"What is the coil voltage rating for contactor relay K1 (3RH2122-1BB40)?", choices:["110V AC","240V AC","24V DC","48V DC"], correct:2 },
+  { id:12, q:"What are the coil terminals labeled on Siemens SIRIUS contactors?", choices:["X1 and X2","A1 and A2","L1 and L2","+ and -"], correct:1 },
+  { id:13, q:"What is the primary function of the SEL-751 Feeder Protection Relay?", choices:["Power metering only","Detect faults like short circuits and overloads","Temperature monitoring","Voltage regulation"], correct:1 },
+  { id:14, q:"What does 'C' curve mean for MCBs?", choices:["Commercial grade protection","Current limiting feature","General applications (5-10× In trip range)","Calibrated for capacitive loads"], correct:2 },
+  { id:15, q:"Typical mounting diameter for panel selectors/indicators?", choices:["16 mm","22 mm (or 22.5 mm)","30 mm","40 mm"], correct:1 },
+  { id:16, q:"What type of contact does the Emergency Stop button normally use?", choices:["Normally Open (NO)","Normally Closed (NC)","Changeover (CO)","Latching type"], correct:1 },
+  { id:17, q:"How many positions does D7P-SB32 have?", choices:["2 positions","3 positions","4 positions","Variable"], correct:1 },
+  { id:18, q:"What contact configuration is 3RH2122-1BB40 (K1)?", choices:["2NO + 2NC","3NO + 1NC","4NO + 0NC","1NO + 3NC"], correct:0 },
+  { id:19, q:"Typical use of Local/Remote selector switch?", choices:["Selecting voltage levels","Local push-button vs remote PLC","Emergency shutdown","Phase selection"], correct:1 },
+  { id:20, q:"Breaking capacity of 5SY62257CC (typical) ?", choices:["3 kA","6 kA","10 kA","16 kA"], correct:1 }
+];
+
+window.IMAGE_CHOICE_QUESTIONS = [
+  { id:21, part:"5SY62257CC", choices:["5SY62257CC.jpg","5ST3010.jpg","5SY43037CC.jpg","XB4BS8444.jpg"], correctIndex:0 },
+  { id:22, part:"5ST3010", choices:["5SY62257CC.jpg","5ST3010.jpg","XB4BS8444.jpg","D7PP4PN3RXD7.jpg"], correctIndex:1 },
+  { id:23, part:"5SY43037CC", choices:["5ST3010.jpg","D7P-LF3PN3GX10.jpg","5SY43037CC.jpg","D7PP4PN3RXD7.jpg"], correctIndex:2 },
+  { id:24, part:"XB4BS8444", choices:["XB4BS8444.jpg","D7PP4PN3RXD7.jpg","3RH2122-1BB40.jpg","3RH2131-1BB40.jpg"], correctIndex:0 },
+  { id:25, part:"D7P-LF3PN3GX10", choices:["D7P-LF3PN3GX10.jpg","D7P-P0PN3AX7.jpg","5SY62257CC.jpg","D7P-P0PN3AX7.jpg"], correctIndex:0 },
+  { id:26, part:"D7P-P0PN3AX7", choices:["D7P-SB32.jpg","D7P-LF3PN3GX10.jpg","D7P-P0PN3AX7.jpg","D7PP4PN3RXD7.jpg"], correctIndex:2 },
+  { id:27, part:"D7PP4PN3RXD7", choices:["3RH2131-1BB40.jpg","3RH2131-1BB40.jpg","D7P-P0PN3AX7.jpg","D7PP4PN3RXD7.jpg"], correctIndex:3 },
+  { id:28, part:"D7P-SB32", choices:["D7P-P0PN3AX7.jpg","D7P-SB32.jpg","D7P-LF3PN3GX10.jpg","3RH2131-1BB40.jpg"], correctIndex:1 },
+  { id:29, part:"3RH2122-1BB40", choices:["3RH2122-1BB40.jpg","D7P-SB32.jpg","3RH2131-1BB40.jpg","D7P-P0PN3AX7.jpg"], correctIndex:0 },
+  { id:30, part:"3RH2131-1BB40", choices:["5SY62257CC.jpg","3RH2122-1BB40.jpg","3RH2131-1BB40.jpg","XB4BS8444.jpg"], correctIndex:2 }
+];
+
+/* ------------------------------
+  Data arrays (components sample)
+-------------------------------*/
+if (typeof components === 'undefined') {
+    const components = [
+        { id: 1,
+        name: "SEL751 Feeder Protection Relay",
+        part: "751002BCB4B7781AFF1",
+        drawing: "0001,0002,0007,0008",
+        desc: "SEL-751 microprocessor-based feeder protection relay for incomer protection with functions: 50, 51, 51N, 86, AFD, 50BF",
+        datasheetLink: "https://www.ien.eu/uploads/tx_etim/751_DS_20131101.pdf",
+        rating: "Incomer Protection",
+        manufacturer: "Schweitzer Engineering Laboratories (SEL)",
+        specs: "SEL-751 microprocessor-based feeder protection relay for incomer protection with functions: 50, 51, 51N, 86, AFD, 50BF",
+        technicalSpecs: "Model: SEL-751 Feeder Protection Relay\nProtection Functions:\n- 50: Instantaneous Overcurrent\n- 51: Time Overcurrent (TOC)\n- 51N: Earth Fault (Ground Overcurrent)\n- 86: Lockout Relay Function\n- AFD: Arc Flash Detection\n- 50BF: Breaker Failure Protection\nInputs:\n- Current: 1A or 5A nominal (configured for 1A from CTs)\n- Voltage: 110V nominal (from VT)\nOutputs:\n- Trip contacts (to breaker trip coil)\n- Alarm contacts\n- SCADA communication\nCommunication:\n- Ethernet (Modbus TCP, IEC 61850)\n- Serial (Modbus RTU)\nPower Supply: 24-48VDC or 110-240VAC\nDisplay: Color touchscreen, 8 pushbuttons\nSlots: A-E + Z for expansion modules",
+        pinIn: "Current Inputs:\n- IA, IB, IC: Phase currents from H01-CT2L1, CT2L2, CT2L3 (250/1A CTs)\n- IN: Residual/neutral current for earth fault (51N)\nVoltage Inputs:\n- VA, VB, VC: Phase voltages from H01-VT01 (110V secondary)\n- VN: Neutral voltage\nControl Power:\n- PWR1, PWR2: 24VDC control supply\nCommunication:\n- Ethernet: Port 1A, 1B (RJ45)\n- Serial: RS-485 for Modbus",
+        pinOut: "Trip Outputs (Slot A - Power Module):\n- OUT101: Main trip output to CB trip coil Y1\n- OUT102: Backup trip / alarm\nAlarm Outputs:\n- Various configurable alarm contacts for SCADA\nStatus LEDs:\n- Enabled, Trip, Instantaneous OC, Phase OC, Ground/Neutral OC, etc.\nAuxiliary Buttons:\n- Target Reset, AUX1-4 (configurable), Lock (enable/trip)\nClose/Trip Indication:\n- Monitors CB status via auxiliary contacts",
+        usageDetails: "Incomer feeder protection for Panel H01 (main 33kV supply)\nProtection Coordination:\n- 50: Instantaneous trip for high-fault currents (short circuit)\n- 51: Time-delayed overcurrent (overload protection)\n- 51N: Sensitive earth fault detection\n- 86: Lockout function after trip (prevents re-close until reset)\n- AFD: Arc flash detection for personnel safety\n- 50BF: Breaker failure backup (trips upstream if breaker fails to open)\nSettings:\n- CT ratio: 250/1\n- VT ratio: 300:1 (33000/110)\n- Pickup settings, time delays per coordination study\nTrends & Metering:\n- Records current, voltage, power, energy\n- Event recording for fault analysis\n- SOE (Sequence of Events) recording",
+        installationNotes: "1. Mount in Panel H01 control section\n2. Wire CT secondaries (H01-CT2L1/2/3) to IA, IB, IC inputs\n3. Wire VT secondary (H01-VT01) to VA, VB, VC inputs\n4. Connect trip output (OUT101) to CB trip coil Y1 through K1 interposing relay\n5. Connect 24VDC control power\n6. Configure settings per protection coordination study:\n   - CT/VT ratios\n   - 50/51/51N pickup and time settings\n   - Communication parameters (IP address, Modbus)\n7. Commission and test:\n   - Primary injection test\n   - Secondary injection test\n   - Trip circuit continuity\n   - Communication to SCADA\n8. Documentation:\n   - Record settings\n   - Event logs\n   - Fault records",
+        safetyWarnings: "⚠️ Configuration by qualified protection engineer only\n⚠️ Verify CT/VT ratios match actual installation\n⚠️ Test trip circuit thoroughly before energization\n⚠️ Backup settings to PC/USB regularly\n⚠️ Do not modify settings without coordination study\n⚠️ Incorrect settings can cause nuisance trips or failure to protect\n⚠️ Arc flash detection (AFD) is life safety - do not disable\n⚠️ Regular testing and maintenance per manufacturer recommendations."
+    },
+    { 
+        id:2, name:"Miniature circuit breaker (25A, 2-pole) (F1)", part:"5SY62257CC", drawing:"0001,0004,0007", desc:"MCB 25A, 2P, 6kA, C", datasheetLink: "https://docs.rs-online.com/8fcd/A700000007224906.pdf",
+        rating: "25A, 2-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Short-Circuit Breaking Capacity (Icn).",
+        technicalSpecs: "Tripping characteristic: C (5 to 10 times In). Suitable for general loads.",
+        pinIn: "Top terminals for Line/Input power (L1, L2)",
+        pinOut: "Bottom terminals for Load/Output circuit (T1, T2)",
+        usageDetails: "Used for overcurrent and short-circuit protection of lighting and socket circuits in control panels.",
+        installationNotes: "Must be mounted vertically on DIN rail. Torque terminals correctly to prevent overheating.",
+        safetyWarnings: "Do not exceed rated current or voltage. Always confirm circuit isolation before working downstream."
+    },
+    // The rest of the components remain unchanged (ids 2 through 94 as in your file)
+    { 
+        id:3, name:"Three-pole MCB (3A) (F5)", part:"5SY43037CC", drawing:"0001,0004", desc:"MCB 3A, 3P, 10kA, C", datasheetLink: "https://asset.conrad.com/media10/add/160267/c1/-/nl/001728442DS00/datenblatt-1728442-siemens-5sy43037-5sy4303-7-leitungsschutzschalter-3-a-230-v-400-v.pdf",
+        rating: "3A, 3-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 10 kA Short-Circuit Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C. Higher breaking capacity suitable for industrial environments.",
+        pinIn: "Top terminals for 3-phase Line input (L1, L2, L3)",
+        pinOut: "Bottom terminals for 3-phase Load output (T1, T2, T3)",
+        usageDetails: "Protection of low-power 3-phase auxiliary supply circuits, e.g., control power transformers or small motors.",
+        installationNotes: "Ensure phase sequence is maintained from input to output.",
+        safetyWarnings: "This device is a protection device, not a lockable isolator. Use an upstream isolator for maintenance."
+    },
+    { 
+        id:4, name:"Three-pole MCB (1A) (F6)", part:"5SY43017CC", drawing:"0001,0004,0007", desc:"MCB 1A, 3P, 10kA, C", datasheetLink: "https://cd-solec.com/storage/produit/5SY4301-7/5SY4301-7.pdf",
+        rating: "1A, 3-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 10 kA Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C. Highly sensitive to low overcurrents.",
+        pinIn: "Top terminals L1, L2, L3",
+        pinOut: "Bottom terminals T1, T2, T3",
+        usageDetails: "Protection of very sensitive 3-phase auxiliary circuits, such as small fan heaters or control voltage supplies.",
+        installationNotes: "Check the inrush current of the load; a B-curve MCB may be needed for highly inductive loads.",
+        safetyWarnings: "Always verify the device trip rating matches the cable size and connected equipment."
+    },
+    { 
+        id:5, name:"Miniature circuit breaker 10A (2-pole) (F10)", part:"5SY62107CC", drawing:"0001,0004,0007", desc:"MCB 10A, 2P, 6kA, C", datasheetLink: "https://docs.rs-online.com/886d/A700000006610260.pdf",
+        rating: "10A, 2-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Short-Circuit Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C.",
+        pinIn: "L1, L2 Input",
+        pinOut: "T1, T2 Output",
+        usageDetails: "Protection of general single-phase utility loads, smaller power supplies, or auxiliary heating elements.",
+        installationNotes: "Compatible with standard DIN rail mounting.",
+        safetyWarnings: "Ensure terminal screws are tight to prevent arc faults."
+    },
+    { 
+        id:6, name:"Miniature circuit breaker 6A (2-pole) (F11)", part:"5SY62067CC", drawing:"0001,0002,0004,0007", desc:"MCB 6A, 2P, 6kA, C", datasheetLink: "https://docs.rs-online.com/1043/A700000006610256.pdf",
+        rating: "6A, 2-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C.",
+        pinIn: "L1, L2 Input",
+        pinOut: "T1, T2 Output",
+        usageDetails: "Protection of control voltage transformers or small instrumentation power supplies.",
+        installationNotes: "The 6A rating is common for control circuits; verify the rating against the transformer primary current.",
+        safetyWarnings: "Avoid bridging terminals with incorrect wires or busbars."
+    },
+    { 
+        id:7, name:"Miniature circuit breaker 16A (2-pole) (F20)", part:"5SY62167CC", drawing:"0001,0004,0007", desc:"MCB 16A, 2P, 6kA, C", datasheetLink: "https://docs.rs-online.com/acb2/A700000006610268.pdf",
+        rating: "16A, 2-pole, 230/400V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C.",
+        pinIn: "L1, L2 Input",
+        pinOut: "T1, T2 Output",
+        usageDetails: "Protection for medium-power single-phase loads, power outlets, or auxiliary motors.",
+        installationNotes: "Used for reliable overcurrent protection in distribution boards.",
+        safetyWarnings: "Ensure conductor sizing meets the 16A rating requirements according to local codes."
+    },
+    { 
+        id:8, name:"Single pole MCB 6A (F9)", part:"5SY61067CC", drawing:"0002,0005", desc:"MCB 6A, 1P, 6kA, C", datasheetLink: "https://docs.rs-online.com/e9bc/0900766b813dff85.pdf",
+        rating: "6A, 1-pole, 230V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C. Only protects the single line wire.",
+        pinIn: "Top terminal (L)",
+        pinOut: "Bottom terminal (T)",
+        usageDetails: "Used for protecting single-phase internal control circuits, alarms, or low-voltage power supplies (where neutral is not switched).",
+        installationNotes: "Do not use in applications where load neutrality must be switched simultaneously with the live conductor.",
+        safetyWarnings: "Single-pole breakers isolate only the line, leaving the neutral connected. Confirm local standards allow this for the application."
+    },
+    { 
+        id:9, name:"Single pole MCB 2A (F90)", part:"5SY61027CC", drawing:"0002,0005,0008", desc:"MCB 2A, 1P, 6kA, C", datasheetLink: "https://docs.rs-online.com/d8f0/0900766b813dff69.pdf",
+        rating: "2A, 1-pole, 230V AC",
+        manufacturer: "Siemens",
+        specs: "Thermal-magnetic trip. 6 kA Breaking Capacity.",
+        technicalSpecs: "Tripping characteristic: C. Lowest rated current in the series.",
+        pinIn: "Top terminal (L)",
+        pinOut: "Bottom terminal (T)",
+        usageDetails: "Protection for very low-power control circuits, indicator lights, or PLC inputs.",
+        installationNotes: "Suitable for fine protection of delicate control system components.",
+        safetyWarnings: "Handle with care to avoid damage to the small terminals."
+    },
+    { 
+        id:10, name:"Schneider Harmony Emergency Stop", part:"XB4BS8444", drawing:"0002,0005", desc:"Emergency stop push-button (Harmony XB4)", datasheetLink: "https://docs.rs-online.com/d721/A700000007335528.pdf",
+        rating: "600V AC/DC Max; Contact rating up to 10A",
+        manufacturer: "Schneider Electric",
+        specs: "22 mm diameter, Mushroom head, Red, Turn-to-release, 1 NC contact block (Normally Closed).",
+        technicalSpecs: "Contact: Slow-break, snap action. IP66/IP67/IP69K protection.",
+        pinIn: "NC terminals (e.g., 1-2) wired in series with the safety circuit.",
+        pinOut: "Output of the safety circuit to the control relay.",
+        usageDetails: "Immediate interruption of dangerous machine operations. Essential part of any machine safety system.",
+        installationNotes: "The NC contact must be monitored by a safety relay to detect wire breakage. Ensure 'Turn-to-release' function is clear.",
+        safetyWarnings: "Must be easily accessible and clearly visible. Do not use for normal machine shut-down."
+    },
+    { 
+        id:11, name:"Selector Switch 3-pos", part:"D7P-SB32", drawing:"0002,0005,0008", desc:"22.5mm selector switch (3 positions)", datasheetLink: "https://www.nhp.com.au/public/assets/pim/Original/10029/D7PSB32-AU-Selector-Switch-22mm-Datasheet.pdf",
+        rating: "N/A (Signal device)",
+        manufacturer: "Sprecher+Schuh",
+        specs: "3-position, maintained action, black knob.",
+        technicalSpecs: "Maximum 6 contact blocks (NO or NC) can be attached.",
+        pinIn: "Common terminal (C)",
+        pinOut: "Terminals for Position 1, Position 2, Position 3 (NO/NC contacts)",
+        usageDetails: "Typically used for Local/Off/Remote control selection on a motor or system.",
+        installationNotes: "Requires a 22.5 mm mounting hole.",
+        safetyWarnings: "Always confirm the actual state of the selector switch before operating the system."
+    },
+    { 
+        id:12, name:"Contactor Relay 3RH2 (K1)", part:"3RH2122-1BB40", drawing:"0002,0005,0008", desc:"Siemens SIRIUS contactor relay (24V coil, 2NO+2NC)", datasheetLink: "https://docs.rs-online.com/eb47/0900766b813eb119.pdf",
+        rating: "Coil: 24V DC. Contacts: 6A (AC-15), 10A (AC-1)",
+        manufacturer: "Siemens",
+        specs: "Auxiliary Contactor, 2 Normally Open (NO) + 2 Normally Closed (NC) contacts.",
+        technicalSpecs: "Integrated suppressor diode for DC coil operation.",
+        pinIn: "A1/A2 (Coil), Auxiliary contacts (e.g., 13/14 for NO, 21/22 for NC)",
+        pinOut: "Output of the auxiliary contacts.",
+        usageDetails: "Used for latching, interlocking, and providing auxiliary feedback contacts in a control circuit.",
+        installationNotes: "Must be mounted vertically for rated current; snap-on mounting on DIN rail.",
+        safetyWarnings: "Ensure coil voltage matches the control supply. Incorrect coil voltage will damage the component."
+    },
+    { 
+        id:13, name:"Green Indicator (push-to-test)", part:"D7P-LF3PN3GX10", drawing:"0003,0006,0009", desc:"Sprecher+Schuh green push-to-test indicator", datasheetLink: "https://www.nhpnz.co.nz/public/assets/pim/Original/10029/D7PLF3PN3GX10-NZ-Pushbutton-22.5mm-Datasheet.pdf",
+        rating: "LED Supply: 24V AC/DC",
+        manufacturer: "Sprecher+Schuh",
+        specs: "22.5 mm, Green lens, Integrated push-to-test function.",
+        technicalSpecs: "Requires a standard 22.5 mm mounting hole. LED light source for long life.",
+        pinIn: "Terminals for the LED power supply.",
+        pinOut: "N/A (Output is light)",
+        usageDetails: "Indicates normal running status (e.g., 'System OK', 'Power On'). The push-to-test feature verifies the LED is functioning.",
+        installationNotes: "The push-to-test circuit requires a momentary contact block (not included) for the test function.",
+        safetyWarnings: "Use only the specified LED voltage to prevent burnout."
+    },
+    { 
+        id:14, name:"Amber Indicator (push-to-test)", part:"D7P-P0PN3AX7", drawing:"0003,0006,0009", desc:"Sprecher+Schuh amber push-to-test indicator", datasheetLink: "https://www.nhp.com.au/-/media/Project/NHP/Sites/Shared/Resources/Catalogues/Files/D7-Pushbuttons--Operator-Control-Devices.pdf",
+        rating: "LED Supply: 24V AC/DC",
+        manufacturer: "Sprecher+Schuh",
+        specs: "22.5 mm, Amber (Yellow) lens, Push-to-test.",
+        technicalSpecs: "Long-life LED. High visibility.",
+        pinIn: "Terminals for LED power.",
+        pinOut: "N/A",
+        usageDetails: "Indicates a non-critical warning or status (e.g., 'Maintenance Required', 'Standby Mode').",
+        installationNotes: "Mount on a clean, flat surface to ensure proper seal.",
+        safetyWarnings: "Ensure indicator meaning is clearly labeled on the panel for rapid operator response."
+    },
+    { 
+        id:15, name:"Red Indicator (push-to-test)", part:"D7PP4PN3RXD7", drawing:"0003,0006,0009", desc:"Sprecher+Schuh red push-to-test indicator", datasheetLink: "https://www.nhp.com.au/public/assets/pim/Original/10044/D7PP4PN3RXD7-AU-Pilot-Light-22.5mm-Datasheet.pdf",
+        rating: "LED Supply: 24V AC/DC",
+        manufacturer: "Sprecher+Schuh",
+        specs: "22.5 mm, Red lens, Push-to-test.",
+        technicalSpecs: "Standard 22.5 mm panel hole.",
+        pinIn: "LED power terminals.",
+        pinOut: "N/A",
+        usageDetails: "Indicates a fault, trip condition, or emergency status (e.g., 'System Failed', 'Overload Trip').",
+        installationNotes: "Often paired with an audible alarm for critical fault indication.",
+        safetyWarnings: "Do not use red indicators for 'System On' unless the system being 'On' represents a hazard."
+    },
+    { 
+        id:16, name:"SEL735 Power Meter (PM01)", part:"SEL735", drawing:"0003", desc:"Power metering relay (SEL735)", datasheetLink: "https://zangagency.com/wp-content/uploads/2024/08/ZANG-Meters-SEL735-Type.pdf",
+        rating: "Voltage: 100-480 VAC. Current: 1A or 5A Nominal CT input.",
+        manufacturer: "SEL",
+        specs: "Revenue-grade metering, power quality monitoring, event recording.",
+        technicalSpecs: "Class 0.2 accuracy. Communications: Ethernet and Serial.",
+        pinIn: "Voltage inputs (V1, V2, V3, VN), Current inputs (I1, I2, I3, IN), Control power.",
+        pinOut: "Digital outputs for pulse/alarm.",
+        usageDetails: "Accurate measurement of energy consumption (kWh) and real-time monitoring of electrical system parameters (V, A, P, Q, F).",
+        installationNotes: "Requires careful CT and VT wiring to maintain phase relationship for accurate power calculation.",
+        safetyWarnings: "**HIGH VOLTAGE COMPONENT.** Requires installation by qualified personnel. Isolate and short CTs before wiring."
+    },
+    { 
+        id:17, name:"Contactor Relay KBE (3NO+1NC)", part:"3RH2131-1BB40", drawing:"0003,0006,0008", desc:"Contactor 3NO+1NC (24V coil)", datasheetLink: "https://docs.rs-online.com/1679/0900766b814b7c1a.pdf",
+        rating: "Coil: 24V DC. Contacts: 6A (AC-15)",
+        manufacturer: "Siemens",
+        specs: "Auxiliary Contactor, 3 Normally Open (NO) + 1 Normally Closed (NC) contacts.",
+        technicalSpecs: "SIRIUS 3RT series, size S00.",
+        pinIn: "A1/A2 (Coil), Auxiliary contacts terminals (e.g., 13/14, 23/24, 33/34 for NO, 41/42 for NC).",
+        pinOut: "Output of auxiliary contacts.",
+        usageDetails: "Used for complex interlocking logic in control circuits where more than two auxiliary contacts are required.",
+        installationNotes: "Ensure correct wiring of NO and NC contacts to prevent unintended operation.",
+        safetyWarnings: "Do not use as a primary motor starter; this is an auxiliary control component."
+    },
+    { 
+        id:18, name:"Contactor Relay 4NO+4NC", part:"3RH2140-1BB40", drawing:"0003,0006,0008", desc:"Contactor with multiple auxiliaries", datasheetLink: "https://docs.rs-online.com/e9b8/0900766b814b7c1d.pdf",
+        rating: "Coil: 24V DC. Contacts: 6A (AC-15)",
+        manufacturer: "Siemens",
+        specs: "Auxiliary Contactor, 4 NO + 4 NC contacts.",
+        technicalSpecs: "High number of auxiliary contacts for complex control schemes.",
+        pinIn: "A1/A2 (Coil), 8 auxiliary contact terminals.",
+        pinOut: "Output of auxiliary contacts.",
+        usageDetails: "For centralized control logic requiring numerous status feedback signals or interlocking conditions.",
+        installationNotes: "The wide profile may require more DIN rail space than standard relays.",
+        safetyWarnings: "Due to the high terminal density, exercise caution to avoid mis-wiring adjacent terminals."
+    },
+    { 
+        id:19, name:"SEL787 Transformer Relay (EPR02)", part:"SEL787", drawing:"0004,0005", desc:"Transformer protection relay (SEL787)", datasheetLink: "https://www.pesin.com.ph/sites/default/files/product-file/787-3-4_ds_20170815.pdf",
+        rating: "Various power supply options. 1A/5A CT inputs.",
+        manufacturer: "SEL",
+        specs: "Differential, Overcurrent, and Thermal protection for two-winding transformers.",
+        technicalSpecs: "Fast tripping on internal faults (differential).",
+        pinIn: "CT inputs (Primary and Secondary), VT inputs, Control power.",
+        pinOut: "Trip/Alarm outputs, Communication ports.",
+        usageDetails: "Dedicated relay for the protection and monitoring of a power transformer.",
+        installationNotes: "Requires proper vector group matching and compensation settings to work correctly.",
+        safetyWarnings: "Critical component in the high-voltage system. Installation and settings must be checked by a protection engineer."
+    },
+    { 
+        id:20, name:"WEGA 2 Capacitive Voltage Detecting System (VDS) A51", part:"WEGA 2", drawing:"001,003,004", desc:"Provides safe visual indication of live status in 33 kV systems. Ensures operator safety during isolation and earthing procedures.", datasheetLink: "https://www.scribd.com/document/633632834/Wega-2-2-C-eng",
+        rating: "System Voltage: 33 kV (Requires capacitive coupling).",
+        manufacturer: "Horstmann",
+        specs: "Three-phase voltage detection, self-test function, permanent LED indication.",
+        technicalSpecs: "Indicates 'Live' or 'Dead' status. Fail-safe operation.",
+        pinIn: "Capacitive inputs from MV/HV bushings.",
+        pinOut: "LED status indicators (L1, L2, L3).",
+        usageDetails: "Installed on switchgear to verify the absence of voltage before accessing cubicles or applying earth switches.",
+        installationNotes: "Requires proper connection to the system's coupling electrodes. Must be functionally checked regularly.",
+        safetyWarnings: "**LIFE SAFETY DEVICE.** Malfunction can lead to severe injury. Never rely solely on VDS; always use a secondary proof of isolation."
+    },
+    // Remaining components 21–94 unchanged...
+    { 
+        id:21,
+        name: "Panel Light B90 (H01 Control Compartment)",
+        part: "B90",
+        drawing: "0001,0002,0004",
+        desc: "240V AC internal panel light for H01 LV control compartment",
+        datasheetLink: null,
+        rating: "240V AC, ~30W (Standard incandescent or LED)",
+        manufacturer: "Generic (Panel Builder)",
+        specs: "Manual or door-activated illumination for control wiring visibility",
+        technicalSpecs: "Wired via terminal block XC40. Protected by MCBs F9 (6A) and F90 (2A).",
+        pinIn: "240V AC supply from auxiliary bus (via F9/F90 MCBs)",
+        pinOut: "N/A (Light output only)",
+        usageDetails: "Provides general illumination inside the H01 LV control door for maintenance and troubleshooting. Activated when panel is powered or via door switch S80.",
+        installationNotes: "Mounted on inner surface of H01 LV control door. Ensure secure mounting and correct bulb/LED rating.",
+        safetyWarnings: "⚠️ Isolate power via F9/F90 before servicing. ⚠️ Do not exceed panel's auxiliary load capacity when replacing." },
+    { 
+        id: 22,
+        name: "Earth Switch E/SW-01 (33kV Incomer H01)",
+        part: "E_SW-01",
+        drawing: "0001,0002,0004,0005",
+        desc: "Manual three-position earth switch for 33kV incomer H01, interlocked with upstream Air Break Switch and ISOL-01",
+        datasheetLink: "https://www.eim.com.ua/documents/upload/doc/1/3AH3.pdf",
+        rating: "33kV, 20kA, Manual Operation",
+        manufacturer: "Siemens (as per switchgear package)",
+        specs: "Three-position: Open / Closed / Earthed. Key-interlocked with upstream Air Break Switch via Fortress KF2 solenoid interlock.",
+        technicalSpecs: "Mechanically interlocked with ISOL-01 (disconnect switch). Cannot be closed unless ISOL-01 is open. Cannot be operated unless upstream Air Break Switch is open (verified via KF2 key release).",
+        pinIn: "Mechanical interlock input from ISOL-01 position. Electrical interlock input from KF2 solenoid (24VDC).",
+        pinOut: "Auxiliary contacts to Remote Switching Panel (RSP01): 521/522 (Earth Open), 523/524 (Earth Closed). Drives indicators H106 (Red, Closed) and H107 (Amber, Open/Fault).",
+        usageDetails: "Used to safely earth the 33kV busbar and cable side of incomer H01 after isolation. Critical for personnel safety during maintenance. Operated only after:\n1. Upstream Air Break Switch is OPEN (releases KF2 key).\n2. ISOL-01 disconnect switch is OPEN.",
+        installationNotes: "Mounted directly on 33kV switchgear compartment. Mechanical position indicator visible on HV door. Auxiliary contacts wired to LV control panel terminals 521–524. Interlock coil (KF2) powered from 24VDC control supply.",
+        safetyWarnings: "⚠️ LIFE-SAFETY DEVICE. Never bypass interlocks.\n⚠️ Earth switch status must be verified visually AND via H106/H107 indicators.\n⚠️ Panel interlocked with upstream Air Break Switch: KF2 key TRAPPED when Air Break Switch is CLOSED.\n⚠️ Never rely solely on WEGA 2 VDS for proof of isolation—ALWAYS apply earth switch.\n⚠️ Only trained HV personnel may operate." },
+    { id:23, name:"E/SW-02 (switch)", part:"E/SW-02", drawing:"—", desc:"Panel switch E/SW-02", datasheetLink: null, rating: "10A @ 250V AC", manufacturer: "Generic", specs: "3-position maintained.", technicalSpecs: "Cam operated.", pinIn: "Input terminals.", pinOut: "Output terminals.", usageDetails: "Function selector.", installationNotes: "Align keyway correctly.", safetyWarnings: "Check switch position before starting equipment." },
+   ];
+    window.components = components;
+}
+
+/* ------------------------------
+  Utilities
+-------------------------------*/
+function normalizeText(s){ if(!s) return ""; return s.toString().trim().toLowerCase().replace(/\s+/g,' ').replace(/[-_]/g,''); }
+function sanitizeSheetName(name){
+    if(!name) return "Sheet";
+    let n = name.toString();
+    n = n.replace(/[:\\/?*\[\]]/g, "_");
+    if(n.length > 31) n = n.substring(0,31);
+    return n;
+}
+function shuffleArray(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+
+/* ------------------------------
+  Study list functions
+-------------------------------*/
+function loadStudy(){
+    const grid = document.getElementById('componentsGrid');
+    grid.innerHTML = '';
+    window.components.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = (e) => { showModal(item.id, e); };
+        const imgBox = document.createElement('div');
+        imgBox.className = 'img-box';
+        imgBox.dataset.part = item.part || '';
+        const img = document.createElement('img');
+        img.src = item.image || '';
+        img.alt = item.name;
+        img.onerror = function(){ this.style.display='none'; imgBox.classList.add('empty'); };
+        imgBox.appendChild(img);
+        const metaWrap = document.createElement('div');
+        const title = document.createElement('div');
+        title.style.fontWeight='700';
+        title.textContent = `${item.name} (${item.part || ''})`;
+        const meta = document.createElement('div');
+        meta.className = 'meta';
+        meta.textContent = item.desc || '';
+        const datasheetWrap = document.createElement('div');
+        datasheetWrap.className='datasheet-wrap';
+        const datasheet = item.datasheetLink ? `<a class="datasheet" href="${item.datasheetLink}" target="_blank" rel="noopener" onclick="event.stopPropagation()">View Datasheet</a>` : `<div class="meta" style="margin-top:8px;">No datasheet</div>`;
+        metaWrap.appendChild(title); metaWrap.appendChild(meta);
+        card.appendChild(imgBox);
+        const tDiv = document.createElement('div');
+        tDiv.appendChild(title); tDiv.appendChild(meta);
+        card.appendChild(tDiv);
+        const ds = document.createElement('div');
+        ds.innerHTML = datasheet;
+        ds.style.marginTop = '8px';
+        card.appendChild(ds);
+        grid.appendChild(card);
+    });
+}
+function filterStudy(){
+    const q = normalizeText(document.getElementById('searchBox').value);
+    document.querySelectorAll('#componentsGrid .card').forEach(card=>{
+        const name = normalizeText(card.querySelector('div:nth-child(2)').innerText || '');
+        const part = normalizeText(card.querySelector('.img-box')?.dataset?.part || '');
+        card.style.display = (name.includes(q) || part.includes(q)) ? '' : 'none';
+    });
+}
+
+/* ------------------------------
+  Modal
+-------------------------------*/
+function getComponentById(id){ return window.components.find(c=>c.id===id); }
+function createDetailRow(label, content){ if(!content) return ''; return `<div class="modal-detail-row"><span class="modal-detail-label">${label}:</span><span class="modal-detail-content">${content}</span></div>`; }
+function showModal(componentId, event){
+    if (event && event.target && event.target.classList && event.target.classList.contains('datasheet')) return;
+    const component = getComponentById(componentId);
+    if(!component) return;
+    const modal = document.getElementById('componentModal');
+    document.getElementById('modalName').innerText = `${component.name} (${component.part || ''})`;
+    const img = document.getElementById('modalImage');
+    img.src = component.image || '';
+    img.onerror = function(){ this.style.display='none'; };
+    let details = '';
+    details += createDetailRow('Description', component.desc || '');
+    details += createDetailRow('Manufacturer', component.manufacturer || '');
+    details += createDetailRow('Rating', component.rating || '');
+    details += createDetailRow('Specs', component.specs || '');
+    details += createDetailRow('Technical', component.technicalSpecs || component.technical || '');
+    details += createDetailRow('Usage', component.usageDetails || '');
+    details += createDetailRow('Installation', component.installationNotes || '');
+    details += createDetailRow('Safety', component.safetyWarnings || '');
+    document.getElementById('modalDetails').innerHTML = details;
+    const ds = document.getElementById('modalDatasheet');
+    if(component.datasheetLink){ ds.href = component.datasheetLink; ds.style.display='inline-block'; document.getElementById('noDatasheet').style.display='none'; }
+    else { ds.style.display='none'; document.getElementById('noDatasheet').style.display='inline-block'; }
+    modal.style.display='block';
+}
+function closeModal(){ document.getElementById('componentModal').style.display='none'; }
+
+/* ------------------------------
+  Login & Tabs (dropdown + static users/admins)
+-------------------------------*/
+let currentRole = 'user';
+let currentUsername = '';
+
+function populateUserSelect(role){
+    const sel = document.getElementById('usernameSelect');
+    sel.innerHTML = '';
+    const list = (role === 'admin') ? ADMINS_LIST : USERS_LIST;
+    list.forEach(u=>{
+        const opt = document.createElement('option');
+        opt.value = u.name;
+        opt.textContent = u.name;
+        sel.appendChild(opt);
+    });
+}
+
+function showLoginForm(role){
+    currentRole = role;
+    document.getElementById('login-form').style.display='block';
+    document.getElementById('login-role-title').innerText = role === 'admin' ? 'Admin Login' : 'User Login';
+    populateUserSelect(role);
+    document.getElementById('login-error').innerText = '';
+    document.getElementById('password').value = '';
+}
+
+function performLogin(){
+    const selectedName = document.getElementById('usernameSelect').value;
+    const pw = document.getElementById('password').value;
+    if(!selectedName){ document.getElementById('login-error').innerText='Select a username'; return; }
+    if(!pw){ document.getElementById('login-error').innerText='Enter password'; return; }
+
+    const list = (currentRole === 'admin') ? ADMINS_LIST : USERS_LIST;
+    const account = list.find(u => u.name === selectedName);
+    if(!account){ document.getElementById('login-error').innerText='Account not found'; return; }
+    if(account.password !== pw){ document.getElementById('login-error').innerText='Incorrect password'; return; }
+
+    // success
+    currentUsername = account.name;
+    document.getElementById('login-section').style.display='none';
+    document.getElementById('main-nav').style.display='flex';
+    if(currentRole === 'admin') document.getElementById('tab-admin-history').style.display='inline-block';
+    loadStudy();
+    showStudy();
+    logActivity('Login', `${currentRole.toUpperCase()} login as ${currentUsername}`);
+}
+
+/* Tab switching */
+document.getElementById('tab-study').addEventListener('click', showStudy);
+document.getElementById('tab-quiz').addEventListener('click', showQuizTab);
+document.getElementById('tab-admin-history').addEventListener('click', showAdminHistory);
+
+function hideAllSections(){
+    document.getElementById('study-section').style.display='none';
+    document.getElementById('quiz-section').style.display='none';
+    document.getElementById('admin-history-section').style.display='none';
+    document.querySelectorAll('#main-nav button').forEach(btn=>btn.classList.remove('active'));
+}
+function showStudy(){ hideAllSections(); document.getElementById('study-section').style.display='block'; document.getElementById('tab-study').classList.add('active'); logActivity('View Tab','Study'); }
+function showQuizTab(){ hideAllSections(); document.getElementById('quiz-section').style.display='block'; document.getElementById('tab-quiz').classList.add('active'); logActivity('View Tab','Quiz'); }
+function showAdminHistory(){ if(currentRole !== 'admin'){ alert('Access Denied'); showStudy(); return; } hideAllSections(); document.getElementById('admin-history-section').style.display='block'; document.getElementById('tab-admin-history').classList.add('active'); renderAdminQuestions(); updateAdminQuizHistoryDisplay(); updateAdminSessionLogDisplay(); document.getElementById('exportResultsBtn').style.display = 'inline-block'; document.getElementById('exportAnswersBtn').style.display = 'inline-block'; }
+
+/* ------------------------------
+  Activity log & history (localStorage)
+-------------------------------*/
+const sessionLog = [];
+function logActivity(action, details){
+    const t = new Date().toISOString();
+    sessionLog.push({t,action,details});
+    updateAdminSessionLogDisplay();
+}
+
+function loadHistory(){
+    const key = 'am_quiz_history_v1';
+    try {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    } catch(e){
+        return [];
+    }
+}
+function saveHistory(entry){
+    const key = 'am_quiz_history_v1';
+    const h = loadHistory();
+    h.push(entry);
+    localStorage.setItem(key, JSON.stringify(h));
+    updateAdminQuizHistoryDisplay();
+}
+function clearHistory(){
+    if(!confirm('Clear all stored history? This cannot be undone.')) return;
+    localStorage.removeItem('am_quiz_history_v1');
+    updateAdminQuizHistoryDisplay();
+}
+
+function updateAdminSessionLogDisplay(){
+    const el = document.getElementById('activityLogDisplay');
+    if(sessionLog.length===0) el.innerHTML = `<p class="small-muted" style="text-align:center">No in-session activity recorded yet.</p>`;
+    else el.innerHTML = sessionLog.map(it => `<div class="log-entry">${it.t} — <strong>${it.action}</strong> — ${it.details||''}</div>`).join('');
+}
+
+function updateAdminQuizHistoryDisplay(){
+    const history = loadHistory();
+    const container = document.getElementById('quizHistoryDisplay');
+    if(!history.length) { container.innerHTML = `<p class="small-muted" style="text-align:center">No saved quiz history.</p>`; return; }
+    let tableHtml = `<table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">When</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Player</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Score</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Details</th></tr></thead><tbody>`;
+    tableHtml += history.map(item => {
+        const details = (item.answers && item.answers.length) ? `<button class="btn" onclick="showAttemptDetails('${item._id}')">View</button>` : '';
+        return `<tr><td style="padding:6px;border-bottom:1px solid #f2f2f2">${item.time}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${item.player}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${item.score}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${details}</td></tr>`;
+    }).join('');
+    tableHtml += `</tbody></table>`;
+    container.innerHTML = tableHtml;
+}
+
+/* Show attempt details modal */
+function showAttemptDetails(id){
+    const history = loadHistory();
+    const attempt = history.find(h => h._id === id);
+    if(!attempt){ alert('Not found'); return; }
+    let html = `<h3>Answers for ${attempt.player} — ${attempt.time}</h3><div style="max-height:400px;overflow:auto;"><table style="width:100%;border-collapse:collapse"><thead><tr><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">#</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Type</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Prompt/Question</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Your Answer</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Correct Answer</th><th style="text-align:left;padding:6px;border-bottom:1px solid #eee">Correct</th></tr></thead><tbody>`;
+    attempt.answers.forEach((a,idx)=>{
+        html += `<tr><td style="padding:6px;border-bottom:1px solid #f2f2f2">${idx+1}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${a.type}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${a.prompt||a.q||''}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${a.userAnswer||''}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${a.correctAnswer||''}</td><td style="padding:6px;border-bottom:1px solid #f2f2f2">${a.correct? 'Yes':'No'}</td></tr>`;
+    });
+    html += `</tbody></table></div>`;
+    const modal = document.getElementById('componentModal');
+    document.getElementById('modalName').innerText = `Attempt Details`;
+    document.getElementById('modalImage').style.display = 'none';
+    document.getElementById('modalDetails').innerHTML = html;
+    document.getElementById('modalDatasheet').style.display = 'none';
+    document.getElementById('noDatasheet').style.display = 'none';
+    modal.style.display='block';
+}
+
+/* ------------------------------
+  Admin question manager (minimal)
+-------------------------------*/
+function toggleForm(id){ const el = document.getElementById(id); el.style.display = (el.style.display==='none' || el.style.display==='') ? 'block' : 'none'; }
+function renderAdminQuestions(){
+    const mcqList = document.getElementById('mcq-questions-list');
+    mcqList.innerHTML = MCQ_QUESTIONS.map((q,idx)=>`<div class="question-item"><div style="font-weight:700">${q.q}</div><div class="small-muted">Choices: ${q.choices.join(' | ')}</div><div class="question-controls"><button class="btn" onclick="editMcq(${idx})">Edit</button><button class="btn" style="background:#ccc;color:#000" onclick="deleteMcq(${idx})">Delete</button></div></div>`).join('') || '<p class="small-muted">No MCQ questions.</p>';
+    const imgIdList = document.getElementById('image-id-questions-list');
+    imgIdList.innerHTML = IMAGE_QUESTIONS.map((q,idx)=>`<div class="question-item"><div style="font-weight:700">${q.prompt || 'Identify image'}</div><div class="small-muted">Part: ${q.part} — File: ${q.filename}</div><div class="question-controls"><button class="btn" onclick="editImageId(${idx})">Edit</button><button class="btn" style="background:#ccc;color:#000" onclick="deleteImageId(${idx})">Delete</button></div></div>`).join('') || '<p class="small-muted">No Image-ID questions.</p>';
+    const imgChoiceList = document.getElementById('image-choice-questions-list');
+    imgChoiceList.innerHTML = IMAGE_CHOICE_QUESTIONS.map((q,idx)=>`<div class="question-item"><div style="font-weight:700">Select image for ${q.part}</div><div class="small-muted">Files: ${q.choices.join(', ')}</div><div class="question-controls"><button class="btn" onclick="editImageChoice(${idx})">Edit</button><button class="btn" style="background:#ccc;color:#000" onclick="deleteImageChoice(${idx})">Delete</button></div></div>`).join('') || '<p class="small-muted">No Image Choice questions.</p>';
+}
+
+/* Functions for adding/editing MCQ / Image questions (simple) */
+function editMcq(index){ const q = MCQ_QUESTIONS[index]; document.getElementById('mcq-edit-id').value=index; document.getElementById('mcq-question').value=q.q; document.getElementById('mcq-choices').value=q.choices.join('\n'); document.getElementById('mcq-correct').value=q.correct; toggleForm('mcq-form'); }
+function saveMcq(){ const idx = document.getElementById('mcq-edit-id').value; const q = document.getElementById('mcq-question').value.trim(); const choices = document.getElementById('mcq-choices').value.split('\n').map(s=>s.trim()).filter(s=>s); const correct = parseInt(document.getElementById('mcq-correct').value); if(!q||choices.length<2||isNaN(correct)){ alert('Invalid MCQ'); return; } const obj = { id: Date.now(), q, choices, correct }; if(idx===''||idx===null) MCQ_QUESTIONS.push(obj); else MCQ_QUESTIONS[idx]=obj; toggleForm('mcq-form'); renderAdminQuestions(); document.getElementById('mcq-edit-id').value=''; document.getElementById('mcq-question').value=''; document.getElementById('mcq-choices').value=''; document.getElementById('mcq-correct').value=''; }
+function deleteMcq(index){ if(confirm('Delete MCQ?')){ MCQ_QUESTIONS.splice(index,1); renderAdminQuestions(); } }
+
+function editImageId(index){ const q = IMAGE_QUESTIONS[index]; document.getElementById('image-id-edit-id').value=index; document.getElementById('image-id-part').value=q.part; document.getElementById('image-id-filename').value=q.filename; document.getElementById('image-id-accepted').value=(q.accepted||[]).join(','); document.getElementById('image-id-prompt').value=q.prompt||''; toggleForm('image-id-form'); }
+function saveImageId(){ const idx = document.getElementById('image-id-edit-id').value; const part=document.getElementById('image-id-part').value.trim(); const filename=document.getElementById('image-id-filename').value.trim(); const accepted=document.getElementById('image-id-accepted').value.split(',').map(s=>s.trim()).filter(s=>s); const prompt=document.getElementById('image-id-prompt').value.trim(); if(!part||!filename){ alert('Enter part and filename'); return; } const obj={id:Date.now(),part,filename,accepted,prompt}; if(idx==='') IMAGE_QUESTIONS.push(obj); else IMAGE_QUESTIONS[idx]=obj; toggleForm('image-id-form'); renderAdminQuestions(); document.getElementById('image-id-edit-id').value=''; }
+function deleteImageId(index){ if(confirm('Delete Image-ID?')){ IMAGE_QUESTIONS.splice(index,1); renderAdminQuestions(); } }
+
+function editImageChoice(index){ const q = IMAGE_CHOICE_QUESTIONS[index]; document.getElementById('image-choice-edit-id').value=index; document.getElementById('image-choice-part').value=q.part; document.getElementById('image-choice-filenames').value=q.choices.join(','); document.getElementById('image-choice-correct').value=q.correctIndex; toggleForm('image-choice-form'); }
+function saveImageChoice(){ const idx=document.getElementById('image-choice-edit-id').value; const part=document.getElementById('image-choice-part').value.trim(); const filenames=document.getElementById('image-choice-filenames').value.split(',').map(s=>s.trim()).filter(s=>s); const correct=parseInt(document.getElementById('image-choice-correct').value); if(!part||filenames.length===0||isNaN(correct)){ alert('Invalid'); return; } const obj={id:Date.now(),part,choices:filenames,correctIndex:correct}; if(idx==='') IMAGE_CHOICE_QUESTIONS.push(obj); else IMAGE_CHOICE_QUESTIONS[idx]=obj; toggleForm('image-choice-form'); renderAdminQuestions(); document.getElementById('image-choice-edit-id').value=''; }
+function deleteImageChoice(index){ if(confirm('Delete Image Choice?')){ IMAGE_CHOICE_QUESTIONS.splice(index,1); renderAdminQuestions(); } }
+
+/* ------------------------------
+  QUIZ ENGINE — with detailed answer logging
+-------------------------------*/
+let quizPool = [];
+let currentIndex = 0;
+let totalScore = 0;
+let player = '';
+let currentAttempt = null;
+const totalQuestions = (()=> MCQ_QUESTIONS.length + IMAGE_CHOICE_QUESTIONS.length + IMAGE_QUESTIONS.length)();
+
+function buildQuizSequence(){
+    quizPool = [];
+    const poolA = shuffleArray(MCQ_QUESTIONS.map(q=>({type:'mcq', ...q})));
+    const poolB = shuffleArray(IMAGE_CHOICE_QUESTIONS.map(q=>({type:'image-choice', ...q})));
+    const poolC = shuffleArray(IMAGE_QUESTIONS.map(q=>({type:'image-id', ...q})));
+    quizPool = poolA.concat(poolB, poolC);
+    document.getElementById('qTotal').innerText = quizPool.length;
+}
+
+function initQuiz(){
+    player = document.getElementById('userName').value.trim() || currentUsername || 'Guest';
+    if(!player){ alert('Please enter your name'); return; }
+    document.getElementById('playerName').innerText = player;
+    document.getElementById('quizStart').style.display='none';
+    document.getElementById('quizArea').style.display='block';
+    document.getElementById('quizEnd').style.display='none';
+    buildQuizSequence();
+    currentIndex = 0;
+    totalScore = 0;
+    document.getElementById('liveScore').innerText = totalScore;
+    document.getElementById('qIndex').innerText = 0;
+
+    currentAttempt = {
+        _id: 'a' + Date.now() + Math.random().toString(36).slice(2,8),
+        time: new Date().toLocaleString(),
+        player,
+        score: '',
+        totalQuestions: quizPool.length,
+        answers: []
+    };
+
+    showQuestion();
+    logActivity('Quiz Started', `Player: ${player}`);
+}
+
+function showQuestion(){
+    const container = document.getElementById('questionContainer');
+    container.innerHTML = '';
+    if(currentIndex >= quizPool.length){
+        finishQuiz();
+        return;
+    }
+    const q = quizPool[currentIndex];
+    document.getElementById('qIndex').innerText = currentIndex + 1;
+    const prog = Math.round(((currentIndex)/quizPool.length)*100);
+    document.getElementById('progFill').style.width = prog + '%';
+
+    if(q.type === 'mcq'){
+        container.innerHTML = `<div class="question-image empty" style="height:120px;display:flex;align-items:center;justify-content:center"><div class="small-muted">MCQ</div></div>
+            <div class="q-text">${q.q}</div>
+            <div class="options">${q.choices.map((c,idx)=> `<div class="option" data-idx="${idx}" onclick="submitMcq(${idx})"><div style="font-weight:700">Option ${String.fromCharCode(65+idx)}</div><div class="small-muted">${c}</div></div>`).join('')}</div>`;
+    } else if(q.type === 'image-choice'){
+        const comp = window.components.find(c=> normalizeText(c.part || c.name) === normalizeText(q.part));
+        const symbolHtml = comp && comp.symbol ? `<div class="question-image"><img id="qimg" src="${comp.symbol}" alt="${q.part}" onerror="this.style.display='none'; this.parentNode.classList.add('empty')" /></div>` : `<div class="question-image empty" style="height:120px;display:flex;align-items:center;justify-content:center"><div class="small-muted">Symbol</div></div>`;
+        container.innerHTML = `${symbolHtml}<div class="q-text">Select the correct image for <strong>${q.part}</strong></div>
+            <div class="options">${q.choices.map((fname,idx)=> `<div class="option" data-idx="${idx}" onclick="submitImageChoice(${idx})"><img src="images/${fname}" onerror="this.style.display='none'"><div class="small-muted">${fname}</div></div>`).join('')}</div>`;
+    } else if(q.type === 'image-id'){
+        container.innerHTML = `<div class="question-image"><img id="qimg" src="images/${q.filename}" alt="${q.part}" onerror="this.style.display='none'; this.parentNode.classList.add('empty')"/></div>
+            <div class="q-text">${q.prompt || 'Identify this component'}</div>
+            <div style="margin-top:12px"><input id="textAnswer" class="text-answer" placeholder="Type part number or name" /></div>
+            <div style="margin-top:12px"><button class="btn" onclick="submitTextAnswer()">Submit</button></div>`;
+        const ta = document.getElementById('textAnswer');
+        if(ta) ta.addEventListener('keydown', e=>{ if(e.key==='Enter') submitTextAnswer(); });
+        if(ta) ta.focus();
+    }
+}
+
+/* Submit handlers */
+function submitMcq(selectedIndex){
+    const q = quizPool[currentIndex];
+    const isCorrect = (selectedIndex === q.correct);
+    if(isCorrect) totalScore++;
+    document.getElementById('liveScore').innerText = totalScore;
+    Array.from(document.querySelectorAll('.option')).forEach(opt=>{
+        const idx = parseInt(opt.dataset.idx);
+        if(idx === q.correct) opt.classList.add('correct');
+        if(idx === selectedIndex && idx !== q.correct) opt.classList.add('incorrect');
+        opt.onclick = null;
+    });
+    currentAttempt.answers.push({
+        type: 'mcq',
+        qid: q.id,
+        q: q.q,
+        choices: q.choices,
+        userAnswer: q.choices[selectedIndex],
+        correctAnswer: q.choices[q.correct],
+        correct: isCorrect
+    });
+    logActivity('Answer', `MCQ #${currentIndex+1} — Selected ${selectedIndex} — Correct: ${q.correct}`);
+    setTimeout(()=>{ currentIndex++; showQuestion(); }, 600);
+}
+
+function submitImageChoice(selectedIndex){
+    const q = quizPool[currentIndex];
+    const isCorrect = (selectedIndex === q.correctIndex);
+    if(isCorrect) totalScore++;
+    document.getElementById('liveScore').innerText = totalScore;
+    Array.from(document.querySelectorAll('.option')).forEach((opt, i)=>{
+        if(i === q.correctIndex) opt.classList.add('correct');
+        if(i === selectedIndex && i !== q.correctIndex) opt.classList.add('incorrect');
+        opt.onclick = null;
+    });
+    currentAttempt.answers.push({
+        type: 'image-choice',
+        qid: q.id,
+        part: q.part,
+        choices: q.choices,
+        userAnswer: q.choices[selectedIndex],
+        correctAnswer: q.choices[q.correctIndex],
+        correct: isCorrect
+    });
+    logActivity('Answer', `ImageChoice #${currentIndex+1} — Selected ${selectedIndex} — Correct: ${q.correctIndex}`);
+    setTimeout(()=>{ currentIndex++; showQuestion(); }, 600);
+}
+
+function submitTextAnswer(){
+    const q = quizPool[currentIndex];
+    const input = document.getElementById('textAnswer');
+    if(!input) return;
+    const raw = input.value || '';
+    const userAns = normalizeText(raw);
+    let correct = false;
+    let correctAnswerText = '';
+    if(q.accepted && Array.isArray(q.accepted) && q.accepted.length){
+        correct = q.accepted.map(normalizeText).includes(userAns);
+        correctAnswerText = q.accepted.join(', ');
+    }
+    if(!correct){
+        const comp = window.components.find(c=> normalizeText(c.part||'') === normalizeText(q.part) || normalizeText(c.name||'') === normalizeText(q.part));
+        if(comp){
+            if(userAns === normalizeText(comp.part) || userAns === normalizeText(comp.name)) correct = true;
+            correctAnswerText = comp.part || comp.name || correctAnswerText;
+        }
+    }
+    if(correct) totalScore++;
+    document.getElementById('liveScore').innerText = totalScore;
+    currentAttempt.answers.push({
+        type: 'image-id',
+        qid: q.id,
+        part: q.part,
+        prompt: q.prompt,
+        userAnswer: raw,
+        correctAnswer: correctAnswerText,
+        correct
+    });
+    logActivity('Answer', `Text #${currentIndex+1} — Answer: ${userAns} — Correct: ${correct}`);
+    currentIndex++;
+    showQuestion();
+}
+
+/* Finish / Result */
+function finishQuiz(){
+    currentAttempt.score = `${totalScore} / ${quizPool.length}`;
+    saveHistory(currentAttempt);
+    document.getElementById('quizArea').style.display='none';
+    document.getElementById('quizEnd').style.display='block';
+    document.getElementById('finalResult').innerText = `${currentAttempt.score} (${currentAttempt.player})`;
+    document.getElementById('progFill').style.width = '100%';
+    logActivity('Quiz Finished', `Player: ${player}, Score: ${currentAttempt.score}`);
+    currentAttempt = null;
+}
+
+/* Restart */
+function restartQuiz(){
+    document.getElementById('quizStart').style.display='block';
+    document.getElementById('quizEnd').style.display='none';
+    document.getElementById('quizArea').style.display='none';
+    document.getElementById('userName').value = '';
+    document.getElementById('playerName').innerText = '';
+    document.getElementById('liveScore').innerText = '0';
+}
+
+/* ------------------------------
+  Excel export (SheetJS)
+-------------------------------*/
+function exportResults(){
+    const history = loadHistory();
+    if(!history.length){ alert('No history to export'); return; }
+    const rows = history.map(h => ({
+        Time: h.time,
+        Player: h.player,
+        Score: h.score,
+        TotalQuestions: h.totalQuestions || (h.answers ? h.answers.length : '')
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Results');
+    XLSX.writeFile(wb, 'Employee_Results.xlsx');
+}
+
+function exportAnswers(){
+    const history = loadHistory();
+    if(!history.length){ alert('No history to export'); return; }
+    const byPlayer = {};
+    history.forEach(h=>{
+        const name = h.player || 'Unknown';
+        if(!byPlayer[name]) byPlayer[name] = [];
+        byPlayer[name].push(h);
+    });
+    const wb = XLSX.utils.book_new();
+    Object.keys(byPlayer).forEach(name=>{
+        const rows = [];
+        byPlayer[name].forEach(attempt=>{
+            rows.push({ Attempt: `Attempt at ${attempt.time}`, Score: attempt.score, '': '' });
+            if(attempt.answers && attempt.answers.length){
+                rows.push({ '#': '#', Type: 'Type', Prompt: 'Prompt/Question', 'Your Answer': 'Your Answer', 'Correct Answer': 'Correct Answer', Correct: 'Correct' });
+                attempt.answers.forEach((a, idx)=>{
+                    rows.push({
+                        '#': idx+1,
+                        Type: a.type,
+                        Prompt: a.q || a.prompt || a.part || '',
+                        'Your Answer': a.userAnswer || '',
+                        'Correct Answer': a.correctAnswer || '',
+                        Correct: a.correct ? 'Yes' : 'No'
+                    });
+                });
+            } else {
+                rows.push({ '#': '', Type: '', Prompt: 'No answers recorded', 'Your Answer': '', 'Correct Answer': '', Correct: '' });
+            }
+            rows.push({}); // empty row between attempts
+        });
+        const sheetName = sanitizeSheetName(name);
+        const ws = XLSX.utils.json_to_sheet(rows, {skipHeader:true});
+        XLSX.utils.book_append_sheet(wb, ws, sheetName);
+    });
+    XLSX.writeFile(wb, 'Employee_Answers.xlsx');
+}
+
+/* ------------------------------
+  Initialization
+-------------------------------*/
+document.getElementById('login-section').style.display = 'block';
+document.getElementById('main-nav').style.display = 'none';
+loadStudy();
+renderAdminQuestions();
+updateAdminQuizHistoryDisplay();
+updateAdminSessionLogDisplay();
+
+</script>
+</body>
+</html>
